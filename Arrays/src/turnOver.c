@@ -13,5 +13,11 @@ int *writeArray(unsigned int n) {
     } else
       resultArray[i] = newValue;
   }
+
+  for (int i = 0; i < n / 2; i++) {
+    int temp = resultArray[i];
+    resultArray[i] = resultArray[n - i - 1];
+    resultArray[n - i - 1] = temp;
+  }
   return resultArray;
 }
