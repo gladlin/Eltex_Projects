@@ -19,6 +19,7 @@ void search_for_user() {
     current_Abonent = current_Abonent->next;
   }
 
-  if (count_users == 0) printf("Абонент с именем %s не существует\n", name);
+  if (count_users == 0)
+    printf("Абонент с именем %s не существует\n", name);
   free(name);
 }

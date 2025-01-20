@@ -22,6 +22,7 @@ void delete_user() {
         tail = current_Abonent->prev;
 
       printf("\nАбонент с номером телефона %s удален\n", tel);
+      free(current_Abonent);
       free(tel);
       return;
     }

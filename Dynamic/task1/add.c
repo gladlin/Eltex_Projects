@@ -9,18 +9,21 @@ void add_abonent() {
 
   printf("\nВведите имя пользователя: \n");
   result_name = write_to_string();
-  if (result_name == NULL) goto cleanup;
+  if (result_name == NULL)
+    goto cleanup;
 
   printf("Введите фамилию пользователя: \n");
   result_sname = write_to_string();
-  if (result_sname == NULL) goto cleanup;
+  if (result_sname == NULL)
+    goto cleanup;
 
   printf("Введите номер телефона пользователя: \n");
   result_tel = write_to_string();
-  if (result_tel == NULL) goto cleanup;
+  if (result_tel == NULL)
+    goto cleanup;
 
-  struct abonent *new_abonent =
-      (struct abonent *)malloc(sizeof(struct abonent)); //почему то утечка памяти при удалении пользователя
+  struct abonent *new_abonent = (struct abonent *)malloc(sizeof(
+      struct abonent));
   if (new_abonent == NULL) {
     printf("Ошибка выделения памяти!\n");
     return;
@@ -33,7 +36,7 @@ void add_abonent() {
   new_abonent->prev = tail;
   new_abonent->next = NULL;
   if (head == NULL)
-    head = new_abonent;  //если создается первый элемент
+    head = new_abonent;
   else
     tail->next = new_abonent;
 
