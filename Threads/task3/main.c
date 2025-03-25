@@ -6,9 +6,14 @@ int main()
 {
     for(int i = 0; i < PRODUCTS; i++)
     {
-        products_list[i].amount = 10000;
-        products_list[i].the_mutex = PTHREAD_MUTEX_INITIALIZER;
+        products_list[i].amount = 5000;
+        pthread_mutex_init(&products_list[i].the_mutex, NULL);
     }
 
     create_shop(products_list);
+
+    for(int i = 0; i < PRODUCTS; i++)
+    {
+        pthread_mutex_destroy(&products_list[i].the_mutex);
+    }
 }
