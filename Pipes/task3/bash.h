@@ -7,5 +7,7 @@
 #define MAX_LEN 128
 #define MAX_ARGS 10
 
-int start_execute(char *command);
-int execute_program(char input_command[MAX_LEN]);
+
+int start_pipe(int fd[2], char *command, int type);
+int execute_command(char *command);
+int execute_pipeline(char input_command[MAX_LEN]);

@@ -11,7 +11,7 @@ int main()
         if(strcmp(input_string, "exit") == 0)
             break;
 
-        int res = execute_program(input_string);
+        int res = execute_pipeline(input_string);
         if(res == EXIT_FAILURE)
         {
             perror("Ошибки при выполнении программы");
