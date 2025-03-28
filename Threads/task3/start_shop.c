@@ -11,8 +11,6 @@ int create_shop(struct product products_list[PRODUCTS]) {
   pthread_t buyers_thread[BUYERS];
   struct thread_and_shops info_threads[BUYERS];
 
-  FILE* fd = fopen("Log.txt", "w");
-
   for (int i = 0; i < BUYERS; i++) {
     info_threads[i] = (struct thread_and_shops){i, products_list};
     if (pthread_create(&buyers_thread[i], NULL, create_buyer,
