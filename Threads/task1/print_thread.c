@@ -24,7 +24,7 @@ int launch_threads()
 void *print_thread(void *index)
 {
     int *new_index = (int*)index;
-    printf("Запущен поток номер %d\n", *new_index);
+    printf("Запущен поток номер %d\n", *new_index+1);
 
     return NULL;
 }

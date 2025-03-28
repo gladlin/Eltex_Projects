@@ -21,6 +21,7 @@ void *start_provider(void *products_list) {
       }
     }
   }
+  printf("\nНужды всех покупателей были удовлетворены!");
 
   return NULL;
 }
