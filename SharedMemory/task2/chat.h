@@ -32,5 +32,7 @@ void *getMessages();
 void *sendMessage(void *arg);
 int send_messages(struct message newMessage);
 void *watch_users(void *arg);
-int start_thread(char *shm_base_username);
+int start_thread(char *shm_base_username, struct message *shm_base_message);
 int start_server();
+int delete_user(char *username);
+void *watch_messages();
