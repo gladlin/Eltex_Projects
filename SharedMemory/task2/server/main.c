@@ -3,6 +3,7 @@
 
 char users[MAX_USERS][MAX_USERNAME];
 int user_count = 0;
+int server_running = 1;
 //pthread_mutex_t user_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
@@ -15,6 +16,15 @@ int main()
 
 int start_server()
 {
+    sem_t *sem_messages;
+
+    sem_messages = sem_open("/messages_count", O_CREAT | O_RDWR, 0666, 0);
+    if (sem_messages == SEM_FAILED)
+    {
+        perror("sem_open messages_count init");
+        exit(1);
+    }
+
     int shm_user_fd, shm_message_fd;
     if ((shm_user_fd = shm_open(SHM_USER, O_CREAT | O_RDWR, 0666)) == -1)
     {
@@ -96,10 +106,8 @@ int start_thread(char *shm_base_username, struct message *shm_base_message)
         perror("pthread_join thread_message");
         exit(1);
     }
-    printf("i am here");
 
     pthread_cancel(thread_user);
-    printf("i am here");
 
     if (pthread_join(thread_user, NULL) != 0)
     {
@@ -114,14 +122,14 @@ void *watch_users(void *arg)
     char message[MAX_LENGHT_MESSAGE] = "";
     char *shm_base_user = (char *)arg;
 
-    sem_t *sem_messages = sem_open("/messages_count", O_CREAT, 0666, 0);
+    sem_t *sem_messages = sem_open("/messages_count", O_RDWR);
     if (sem_messages == SEM_FAILED)
     {
         perror("sem_open messages_count");
         pthread_exit(NULL);
     }
 
-    while (1)
+    while (server_running == 1)
     {
         if (strcmp(shm_base_user, "") == 0 || strcmp(shm_base_user, "\n") == 0)
             continue;
@@ -135,7 +143,7 @@ void *watch_users(void *arg)
         }
 
         if (!already_exists) {
-
+            printf("%s\n", shm_base_user);
             if (user_count < MAX_USERS)
             {
                 strcpy(users[user_count], shm_base_user);
@@ -197,14 +205,12 @@ void *watch_messages(void *arg)
                     memset(users[user_count], 0, MAX_USERNAME);
 
                     printf("Сервер: Пользователь %s отключился, осталось пользователей: %d\n", msg.username, user_count);
-                }
-
-                if (user_count == 0)
-                {
-                    printf("Сервер: Все пользователи отключились, завершаю работу\n");
-                    sem_unlink("/messages_count");
-                    printf("пытаюсь завершить работу");
-                    break;
+                    if (user_count == 0)
+                    {
+                        printf("Сервер: Все пользователи отключились, завершаю работу\n");
+                        server_running = 0;
+                        break;
+                    }
                 }
             }
             last_seen++;

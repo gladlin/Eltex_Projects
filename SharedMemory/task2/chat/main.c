@@ -43,9 +43,9 @@ int connectToChat()
 
     strcpy(shm_base_username, username);
     usleep(500000);
-    memset(shm_base_username, 0, MAX_USERNAME);
 
     start_thread_client(username);
+    memset(shm_base_username, 0, MAX_USERNAME);
 
     munmap(shm_base_username, MAX_USERNAME);
     close(shm_user_fd);
@@ -56,17 +56,17 @@ int start_thread_client(char *username)
 {
     pthread_t thread_get, thread_send;
 
-    int res_get = pthread_create(&thread_get, NULL, getMessages, (void *)username);
-    if (res_get != 0)
-    {
-        perror("Ошибка создания потока thread_get");
-        exit(1);
-    }
-
     int res_send = pthread_create(&thread_send, NULL, sendMessage, (void *)username);
     if (res_send != 0)
     {
         perror("Ошибка создания потока thread_send");
+        exit(1);
+    }
+
+    int res_get = pthread_create(&thread_get, NULL, getMessages, (void *)username);
+    if (res_get != 0)
+    {
+        perror("Ошибка создания потока thread_get");
         exit(1);
     }
 
@@ -113,21 +113,21 @@ void *getMessages()
     while (flag_is_connected == 1)
     {
         sem_getvalue(sem_messages, &sem_value);
-        if (last_seen < sem_value)
+        while (last_seen < sem_value)
         {
-            newMessage = shm_base_message[last_seen];
-            if (strcmp(newMessage.username, "system message") == 0)
-                printf("%s\n", newMessage.message);
-            else if (strcmp(newMessage.message, "exit") == 0)
-                printf("Пользователь %s покинул чат\n", newMessage.username);
-            else
-                printf("%s: %s\n", newMessage.username, newMessage.message);
-            last_seen++;
+            if (last_seen < sem_value)
+            {
+                newMessage = shm_base_message[last_seen % MAX_MESSAGES];
+                if (strcmp(newMessage.username, "system message") == 0)
+                    printf("%s\n", newMessage.message);
+                else if (strcmp(newMessage.message, "exit") == 0)
+                    printf("Пользователь %s покинул чат\n", newMessage.username);
+                else
+                    printf("%s: %s\n", newMessage.username, newMessage.message);
+                last_seen++;
+            }
         }
-        else
-        {
-            usleep(100000);
-        }
+        usleep(100000);
     }
 
     munmap(shm_base_message, sizeof(struct message) * MAX_MESSAGES);
@@ -149,6 +149,8 @@ void *sendMessage(void *arg)
             break;
         }
         message[strcspn(message, "\n")] = '\0';
+        if(strcmp(message, "") == 0)
+            continue;
 
         struct message newMessage;
         strcpy(newMessage.username, username);
