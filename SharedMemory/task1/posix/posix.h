@@ -1,0 +1,9 @@
+#include <stdio.h>
+#include <sys/shm.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <string.h>
