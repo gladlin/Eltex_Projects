@@ -1,3 +1,6 @@
+#ifndef CHAT_H
+#define CHAT_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,14 +28,4 @@ struct message
 
 extern struct message *shm_base_message;
 
-int send_messages(struct message newMessage);
-int connectToChat();
-int start_thread_client(char *username);
-void *getMessages();
-void *sendMessage(void *arg);
-int send_messages(struct message newMessage);
-void *watch_users(void *arg);
-int start_thread(char *shm_base_username, struct message *shm_base_message);
-int start_server();
-int delete_user(char *username);
-void *watch_messages();
+#endif
