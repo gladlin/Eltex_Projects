@@ -12,9 +12,9 @@ time_t ask_driver(pid_t driver, time_t task_time_end)
     if(kill(driver, SIGUSR1) == -1)
         perror("kill");
 
-    if(pause() == -1 && errno == EINTR) // Interrupted system call
+    if(pause() == -1 && errno != EINTR)
     {
-        perror("pause bitch");
+        perror("pause");
         return (time_t)-1;
     }
 

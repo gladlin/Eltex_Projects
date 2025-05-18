@@ -49,6 +49,8 @@ void handle_input()
         }
         else if (strcmp(command, "get_drivers") == 0)
             get_drivers();
+        else if (strcmp(command, "exit") == 0)
+            break;
         else
         {
             printf("Была введена неверная команда: '%s'\n", command ? command : "NULL");

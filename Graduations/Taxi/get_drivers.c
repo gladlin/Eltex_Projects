@@ -12,10 +12,10 @@ void get_drivers()
         time_t answer_from_driver = ask_driver(current_driver.driver_pid, 0);
 
         if(answer_from_driver == 0)
-            printf("Process with PID %d is Avaible", current_driver.driver_pid);
+            printf("Process with PID %d is Avaible\n", current_driver.driver_pid);
         else if(answer_from_driver == (time_t)-1)
-            printf("Error while waiting answer");
+            printf("Error while waiting answer\n");
         else
-            printf("Process with PID %d is Busy for %ld seconds", current_driver.driver_pid, answer_from_driver);
+            printf("Process with PID %d is Busy for %ld seconds\n", current_driver.driver_pid, answer_from_driver);
     }
 }
