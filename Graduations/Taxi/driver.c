@@ -24,16 +24,43 @@ void handle_siguser1()
 void driver_life(struct driver *current_driver)
 {
     common_driver = current_driver;
-    struct sigaction sa;
-    sa.sa_handler = handle_siguser1;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-
-    if(sigaction(SIGUSR1, &sa, NULL) != 0)
+    sigset_t sig_mask;
+    if(sigemptyset(&sig_mask) == -1)
     {
-        perror("sigaction");
+        perror("sigemptyset");
         return;
     }
+    if(sigaddset(&sig_mask, SIGUSR1) == -1)
+    {
+        
+        perror("sigaddset");
+        return;
+    }
+
+    int signal_fd = signalfd(-1, &(sig_mask), 0);
+    if(signal_fd == -1)
+    {
+        perror("signalfd");
+        return;
+    }
+
+    int epoll_fd = epoll_create(1);
+    if(epoll_fd == -1)
+    {
+        perror("epoll_create");
+        return;
+    }
+
+    struct epoll_event new_event;
+    new_event.events = EPOLLIN;
+    if(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, signal_fd, &new_event) == -1)
+    {
+        perror("epoll_ctl");
+        return;
+    }
+
+    // epoll_pwait(epoll_fd, &new_event, 1, 100000, ) нужно проставить маску как-то
+
     while(1)
     {
         if (pause() == -1 && errno == EINTR)

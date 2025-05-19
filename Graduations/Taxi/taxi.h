@@ -12,6 +12,8 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
+#include <sys/signalfd.h>
+#include <sys/epoll.h>
 
 #define BUF_SIZE 64
 #define SHM_COMMAND "/command_shm"
