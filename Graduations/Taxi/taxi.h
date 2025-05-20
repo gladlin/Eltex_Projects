@@ -14,6 +14,8 @@
 #include <errno.h>
 #include <sys/signalfd.h>
 #include <sys/epoll.h>
+#include <sys/epoll.h>
+#include <sys/timerfd.h>
 
 #define BUF_SIZE 64
 #define SHM_COMMAND "/command_shm"
@@ -35,10 +37,12 @@ void send_task(char *pid, char *task_timer);
 void handle_input();
 void get_status(char *pid);
 void get_drivers();
-void handle_siguser1();
-void driver_life(struct driver *current_driver);
 pid_t create_driver();
 time_t ask_driver(pid_t driver, time_t task_time_end);
 void cli_handler_siguser1();
+void driver_life(struct driver *current_driver);
+void init_driver_resources(struct driver *current_driver, int *signal_fd, int *timer_fd, int *epoll_fd) ;
+void process_driver_events(int signal_fd, int timer_fd, int epoll_fd);
+void cleanup_driver_resources(int signal_fd, int timer_fd, int epoll_fd);
 
 #endif

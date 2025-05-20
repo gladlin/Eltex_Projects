@@ -61,5 +61,5 @@ void handle_input()
 
 void cli_handler_siguser1()
 {
-    //что-то делать
+   
 }

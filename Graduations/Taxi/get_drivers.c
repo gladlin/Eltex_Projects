@@ -10,7 +10,6 @@ void get_drivers()
     {
         current_driver = drivers[i];
         time_t answer_from_driver = ask_driver(current_driver.driver_pid, 0);
-        printf("Asked\n");
         if(answer_from_driver == 0)
             printf("Process with PID %d is Avaible\n", current_driver.driver_pid);
         else if(answer_from_driver == (time_t)-1)
