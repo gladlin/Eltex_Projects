@@ -8,7 +8,6 @@ time_t ask_driver(pid_t driver, time_t task_time_end)
     struct command new_command = { driver,  task_time_end };
 
     memcpy(command_memory, &new_command, sizeof(new_command));
-
     if(kill(driver, SIGUSR1) == -1)
         perror("kill");
 
