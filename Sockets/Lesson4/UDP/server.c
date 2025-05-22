@@ -12,8 +12,8 @@ int main()
     }
 
     server.sin_family = AF_INET;
-    server.sin_port = htons(3456);
-    server.sin_addr.s_addr = htonl(INADDR_ANY);
+    server.sin_port = SERVER_PORT;
+    server.sin_addr.s_addr = inet_addr(SERVER_ADDRESS);
 
     if(bind(server_fd, (struct sockaddr *)&server, sizeof(server)) == -1)
     {
@@ -21,7 +21,7 @@ int main()
         close(server_fd);
         exit(1);
     }
-
+    
     char buf[SIZE_OF_BUF];
     socklen_t sizeof_client = sizeof(client);
     if(recvfrom(server_fd, buf, SIZE_OF_BUF, 0, (struct sockaddr *)&client, &sizeof_client) == -1)

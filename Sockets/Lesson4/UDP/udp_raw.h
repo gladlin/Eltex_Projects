@@ -11,6 +11,5 @@
 #define SIZE_OF_BUF 32
 #define CLIENT_PORT 7777
 #define SERVER_PORT 8888
-#define CLEINT_ADDRES "210.213.204.201"
-
-char *server_ip;
+#define CLIENT_ADDRESS "210.213.204.201"
+#define SERVER_ADDRESS "127.0.0.1"

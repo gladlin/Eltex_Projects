@@ -2,92 +2,92 @@
 
 int main()
 {
-    char buf[SIZE_OF_BUF];
-    if(fgets(buf, SIZE_OF_BUF, stdin) == NULL)
+    char payload[SIZE_OF_BUF];
+    if(fgets(payload, SIZE_OF_BUF, stdin) == NULL)
     {
         perror("fgets");
-        return -1;
+        exit(EXIT_FAILURE);
     }
+
+    payload[strcspn(payload, "\n")] = '\0';
+    ssize_t payload_len = strlen(payload);
+
+    
     int client_fd = socket(AF_INET, SOCK_RAW, IPPROTO_UDP);
-    struct sockaddr_in client;
-    
-    client.sin_family = AF_INET;
-    client.sin_port = htons(CLIENT_PORT);
-    client.sin_addr.s_addr = inet_addr(CLEINT_ADDRES);
-
-    if(bind(client_fd, (struct sockaddr *)&client, sizeof(struct sockaddr)) == -1)
+    if(client_fd == -1)
     {
-        perror("bind"); // cannot assign requested address
+        perror("socket");
         close(client_fd);
-        return -1;
+        exit(EXIT_FAILURE);
     }
 
-    if(setsockopt(client_fd, IPPROTO_IP, IP_HDRINCL, NULL, sizeof(int)) < 0 )
+    char packet_udp[payload_len + 8];
+    if(memset(packet_udp, 0, sizeof(packet_udp)) == NULL)
     {
-        perror("setsockopt");
+        perror("memset");
         close(client_fd);
-        return -1;
+        exit(EXIT_FAILURE);
     }
 
-    printf("I am here\n");
-    struct udphdr *buf_header = (struct udphdr *)(SIZE_OF_BUF + sizeof(struct iphdr));
-    buf_header->source = htons(CLIENT_PORT);
-    buf_header->dest = htonl(SERVER_PORT);
-    buf_header->len = sizeof(buf) + sizeof(struct iphdr);
-    buf_header->check = 0;
-    
 
-    char newBuf[SIZE_OF_BUF + 8];
+    struct udphdr *udp_header = (struct udphdr *)packet_udp;
+    udp_header->source = CLIENT_PORT;
+    udp_header->dest = SERVER_PORT;
+    udp_header->len = htons(payload_len + 8);
+    udp_header->check = 0;
 
-    if(strcpy(newBuf, (char *)buf_header) ==  NULL)
+    if(memcpy(packet_udp + sizeof(struct udphdr), payload, payload_len) == NULL)
     {
-        perror("strcpy");
+        perror("memcpy");
         close(client_fd);
-        return -1;
-    }
-
-    if(strcat(newBuf, buf) ==  NULL)
-    {
-        perror("strcpy");
-        close(client_fd);
-        return -1;
+        exit(EXIT_FAILURE);
     }
 
     struct sockaddr_in server;
-
     server.sin_family = AF_INET;
     server.sin_port = htons(SERVER_PORT);
-    server.sin_addr.s_addr = inet_addr(server_ip);
+    server.sin_addr.s_addr = inet_addr(SERVER_ADDRESS);
 
-    if(sendto(client_fd, newBuf, sizeof(newBuf) , 0, (struct sockaddr *)&server, (socklen_t)sizeof(struct sockaddr)) == -1)
+
+    char zero[8] = {0};
+    if(memcpy(server.sin_zero, zero, 8) == NULL)
     {
-        perror("sendto");
+        perror("memcpy");
         close(client_fd);
-        return -1;
+        exit(EXIT_FAILURE);
     }
-    printf("Клиент отправил серверу строку: %s\n", buf);
 
-    struct udphdr newMessage[SIZE_OF_BUF + 8];
+    socklen_t server_len = sizeof(server);
 
+    if(sendto(client_fd, packet_udp, sizeof(packet_udp), 0, (struct sockaddr *)&server, server_len) == -1)
+    {
+        perror("socket");
+        close(client_fd);
+        exit(EXIT_FAILURE);
+    }
+    printf("Клиент отправил строку серверу: %s\n", payload);
+
+    char answer[20 + 8 + SIZE_OF_BUF];
     while(1)
     {
-        if(recvfrom(client_fd, newBuf,  sizeof(newBuf) , 0, (struct sockaddr *)&server,  (socklen_t *)sizeof(struct sockaddr)) != -1)
+        if(recvfrom(client_fd, answer, sizeof(answer), 0, (struct sockaddr *)&server, &server_len) == -1)
         {
-            memcpy(newMessage, newBuf, 8);
-            if(newMessage->dest == buf_header->source)
-            {
-                printf("Клиент получил сообщение %s\n", newBuf);
-                break;
-            }
-        }
-        else
-        {
-            perror("recvfrom");
+            perror("socket");
             close(client_fd);
-            return -1;
+            exit(EXIT_FAILURE);
+        }
+        struct iphdr *ip_header = (struct iphdr *)answer;
+        int ipheader_len = ip_header->ihl * 4;
+        struct udphdr *udp_header = (struct udphdr *)(answer + ipheader_len);
+        if(udp_header->dest == CLIENT_PORT && udp_header->source == SERVER_PORT)
+        {
+            char *payload = (char *)(answer + ipheader_len +  sizeof(struct udphdr));
+            printf("Клиент получил сообщение от сервера: %s\n", payload);
+            break;
         }
     }
-
+    
+    close(client_fd);
 
     return 0;
 }
