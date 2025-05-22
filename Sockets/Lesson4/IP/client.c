@@ -12,7 +12,7 @@ int main()
     payload[strcspn(payload, "\n")] = '\0';
     ssize_t len_payload = strlen(payload);
 
-    int client_fd = socket(AF_INET, SOCK_RAW, IPPROTO_IP);
+    int client_fd = socket(AF_INET, SOCK_RAW, IPPROTO_UDP);
     if (client_fd == -1)
     {
         perror("socket");

@@ -32,7 +32,6 @@ int main()
     }
 
     printf("Сервер принял строку: %s\n", buf);
-    printf("\n%d", client.sin_addr.s_addr);
     buf[0] += 1;
     printf("Сервер изменил строку на: %s\n", buf);
 
