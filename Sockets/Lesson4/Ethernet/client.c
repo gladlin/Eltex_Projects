@@ -36,8 +36,8 @@ int main()
     memset(packet, 0, sizeof(packet));
 
     struct ethhdr* ethernet_header = (struct ethhdr *)packet;
-    unsigned char client_mac[6] = {0x08, 0x00, 0x27, 0xaa, 0xbb, 0xcc}; // надо заменить
-    unsigned char server_mac[6] = {0x08, 0x00, 0x27, 0xdd, 0xee, 0xff}; // надо заменить
+    unsigned char client_mac[6] = CLIENT_MAC;
+    unsigned char server_mac[6] = SERVER_MAC;
 
     memcpy(ethernet_header->h_source, client_mac, ETH_ALEN);
     memcpy(ethernet_header->h_dest, server_mac, ETH_ALEN);  
@@ -64,14 +64,9 @@ int main()
     udp_header->len = htons(len_payload + 8);
     udp_header->check = 0;
 
-    if(memcpy(packet + sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(struct udphdr), payload, len_payload))
-    {
-        perror("memcpy");
-        close(client_fd);
-        exit(EXIT_FAILURE);
-    }
+    memcpy(packet + sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(struct udphdr), payload, len_payload);
 
-    char *ifname = "etho1"; // надо поменять в соответствии с тем что находится на виртуалках
+    char *ifname = "enp0s3";
     int index = if_nametoindex(ifname);
     if(index == -1)
     {
