@@ -100,11 +100,15 @@ int main()
             close(client_fd);
             exit(EXIT_FAILURE);
         }
-        struct udphdr *newUdphdt = (struct udphdr *)(answer + ip_header->ihl * 4);
-        char *newPayload = (char*)(answer + ip_header->ihl * 4 + sizeof(struct udphdr));
-        if(newUdphdt->source == SERVER_PORT && newUdphdt->dest == CLIENT_PORT)
+        
+        struct iphdr *recv_ip = (struct iphdr *)(answer);
+        int ihl_recv = recv_ip->ihl * 4;
+        struct udphdr *recv_udp = (struct udphdr *)(answer + ihl_recv);
+        char *recv_payload = (char *)(answer + ihl_recv + sizeof(struct udphdr));
+
+        if (recv_udp->source == SERVER_PORT && recv_udp->dest == CLIENT_PORT)
         {
-            printf("Клиент получил сообщение от сервера: %s\n", newPayload);
+            printf("Клиент получил сообщение от сервера: %s\n", recv_payload);
             break;
         }
     }
