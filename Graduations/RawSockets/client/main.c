@@ -1,20 +1,19 @@
 #include "../echo_server_client.h"
 
-void change_Symb(char *message)
+int main(int argc, char *argv[])
 {
-    while(*message != '\0')
+    if(argc != 2)
     {
-        if(*message == '\n')
-        {
-            *message = '\0';
-            return;
-        }
-        message++;
+        printf("Введите свой порт в качестве аргумента для запуска программы!\n");
+        exit(EXIT_FAILURE);
     }
-}
 
-int main()
-{
+    int port = atoi(argv[1]);
+    if(port <= 0)
+    { 
+        printf("Введите корректное значение порта!\n");
+        exit(EXIT_FAILURE);
+    }
     int client_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if(client_fd == -1)
     {
@@ -22,13 +21,14 @@ int main()
         exit(EXIT_FAILURE);
     }
 
+    srandom(time(NULL));
     struct sockaddr_in client_addr = {0};
     client_addr.sin_family = AF_INET;
-    client_addr.sin_port = htons(12345); // генерировать значение и умножить его на 10к
-    client_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    client_addr.sin_port = htons(port);
+    client_addr.sin_addr.s_addr = inet_addr(IP_ADDRESS);
     
     bind(client_fd, (struct sockaddr *)&client_addr, sizeof(client_addr));
-    printf("Мой адрес и порт: %d %d\n", client_addr.sin_addr.s_addr, client_addr.sin_port);
 
     struct sockaddr_in send_to;
     send_to.sin_port = htons(PORT);
@@ -39,32 +39,8 @@ int main()
 
     char message[BUFSIZE] = "";
     
-    printf("\nВведите сообщение: ");
-    if(fgets(message, BUFSIZE, stdin) == NULL)
-    {
-        perror("fgets client");
-        close(client_fd);
-        exit(EXIT_FAILURE);
-    }
-    change_Symb(message);
-
     while(strcmp(message, "exit") != 0)
     {
-        if(sendto(client_fd, message, BUFSIZE, 0, (struct sockaddr *)&send_to, sizeofServer) == -1)
-        {
-            perror("sendto client");
-            close(client_fd);
-            exit(EXIT_FAILURE);
-        }
-        printf("Отправил сообщение\n");
-        if(recvfrom(client_fd, message, BUFSIZE, 0, (struct sockaddr *)&send_to, &sizeofServer) == -1)
-        {
-            perror("recvfrom client");
-            close(client_fd);
-            exit(EXIT_FAILURE);
-        }
-        printf("Сообщение от сервера: %s", message);
-
         printf("\nВведите сообщение: ");
         if(fgets(message, BUFSIZE, stdin) == NULL)
         {
@@ -72,8 +48,29 @@ int main()
             close(client_fd);
             exit(EXIT_FAILURE);
         }
-        change_Symb(message);
+
+        message[strcspn(message, "\n")] = '\0';
+
+        if(sendto(client_fd, message, strlen(message), 0, (struct sockaddr *)&send_to, sizeofServer) == -1)
+        {
+            perror("sendto client");
+            close(client_fd);
+            exit(EXIT_FAILURE);
+        }
+
+        if(strcmp(message, "exit") == 0)
+            break;
+
+        memset(message, 0, sizeof(message));
+        if(recvfrom(client_fd, message, BUFSIZE, 0, (struct sockaddr *)&send_to, &sizeofServer) == -1)
+        {
+            perror("recvfrom client");
+            close(client_fd);
+            exit(EXIT_FAILURE);
+        }
+        printf("Сообщение от сервера: %s", message);
     }
+
     close(client_fd);
     return 0;
 }
